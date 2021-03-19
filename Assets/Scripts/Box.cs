@@ -7,7 +7,7 @@ public class Box : MonoBehaviour
     {
         if (tar.name == "Muzzle")
         {
-            rigidbody.AddForce(tar.transform.forward * 800f);
+            GetComponent<Rigidbody>().AddForce(tar.transform.forward * 800f);
         }
     }
 }

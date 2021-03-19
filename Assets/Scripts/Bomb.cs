@@ -13,14 +13,14 @@ public class Bomb : MonoBehaviour
 
     void Explode()
     {
-        rigidbody.useGravity = false;
-        collider.enabled = false;
+        GetComponent<Rigidbody>().useGravity = false;
+        GetComponent<Collider>().enabled = false;
 
         GameObject[] Boxes = GameObject.FindGameObjectsWithTag("Box");
 
         for (int i = 0; i < Boxes.Length; i++)
         {
-            Boxes[i].rigidbody.AddExplosionForce(2000f, transform.position, 6.0f);
+            Boxes[i].GetComponent<Rigidbody>().AddExplosionForce(2000f, transform.position, 6.0f);
         }
     }
 }

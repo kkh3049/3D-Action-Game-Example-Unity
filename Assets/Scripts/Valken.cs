@@ -131,8 +131,8 @@ public class Valken : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Z) || Bbutton.isClick)
         {
-            rigidbody.constantForce.force = Vector3.zero;
-            if (rigidbody.velocity.y < 4f) rigidbody.AddRelativeForce(Vector3.up * 20f);
+            GetComponent<Rigidbody>().GetComponent<ConstantForce>().force = Vector3.zero;
+            if (GetComponent<Rigidbody>().velocity.y < 4f) GetComponent<Rigidbody>().AddRelativeForce(Vector3.up * 20f);
 
             if (!Boost.loop)
             {
@@ -143,15 +143,15 @@ public class Valken : MonoBehaviour
         }
         else
         {
-            rigidbody.constantForce.force = new Vector3(0f, -10f, 0f);
+            GetComponent<Rigidbody>().GetComponent<ConstantForce>().force = new Vector3(0f, -10f, 0f);
             Boost.loop = false;
         }
 
         if (Input.GetKey(KeyCode.X) || Abutton.isClick)
         {
-            if (!audio.isPlaying)
+            if (!GetComponent<AudioSource>().isPlaying)
             {
-                audio.Play();
+                GetComponent<AudioSource>().Play();
                 StartCoroutine("LightControl");
             }
             RightMuzzle.emissionRate = LeftMuzzle.emissionRate = 10;
@@ -159,7 +159,7 @@ public class Valken : MonoBehaviour
         }
         else
         {
-            audio.Stop();
+            GetComponent<AudioSource>().Stop();
             RightMuzzle.emissionRate = RightFire.emissionRate = LeftMuzzle.emissionRate = LeftFire.emissionRate = 0;
             LeftLight.intensity = RightLight.intensity = 0f;
             StopCoroutine("LightControl");
@@ -169,7 +169,7 @@ public class Valken : MonoBehaviour
         {
             LaunchMissile();
         }
-        rigidbody.velocity = new Vector3(0f, rigidbody.velocity.y, 0f);
+        GetComponent<Rigidbody>().velocity = new Vector3(0f, GetComponent<Rigidbody>().velocity.y, 0f);
     }
 
     void LaunchMissile()

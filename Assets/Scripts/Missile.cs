@@ -13,7 +13,7 @@ public class Missile : MonoBehaviour
 
     void SetActive()
     {
-        collider.enabled = true;
+        GetComponent<Collider>().enabled = true;
     }
 
     void Explode()
@@ -28,7 +28,7 @@ public class Missile : MonoBehaviour
         {
             if (col.tag == "Box")
             {
-                col.rigidbody.AddExplosionForce(2000f, transform.position, 6.0f);
+                col.GetComponent<Rigidbody>().AddExplosionForce(2000f, transform.position, 6.0f);
             }
             else if (col.tag == "Enemy")
             {
