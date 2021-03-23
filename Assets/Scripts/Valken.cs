@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Mirror;
+using Random = UnityEngine.Random;
 
 enum Direction
 {
@@ -19,6 +20,9 @@ public class Valken : NetworkBehaviour
     public ParticleSystem Boost;
     public Transform MissilePoint;
 
+    public TextMesh playerNameText;
+    public GameObject floatingInfo;
+
 
     public JoyStick MyStick;
     public GameButton Abutton, Bbutton;
@@ -29,11 +33,39 @@ public class Valken : NetworkBehaviour
     public bool isMoving = false;
     float JumpTimer = 0f;
 
+    [SyncVar(hook = nameof(OnNameChanged))]
+    public string playerName;
+
+    [SyncVar(hook = nameof(OnColorChanged))]
+    public Color playerColor = Color.white;
+
     public override void OnStartLocalPlayer()
     {
         Camera.main.GetComponent<FollowCam>().TargetPlayer = transform;
+
+        string name = "Player" + Random.Range(100, 999);
+        Color color = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
+        CmdSetupPlayer(name, color);
     }
-    
+
+    [Command]
+    public void CmdSetupPlayer(string _name, Color _col)
+    {
+        playerName = _name;
+        playerColor = _col;
+    }
+
+    void OnNameChanged(string _Old, string _New)
+    {
+        playerNameText.text = playerName;
+    }
+
+    void OnColorChanged(Color _Old, Color _New)
+    {
+        playerNameText.color = _New;
+        //Change Player Material Color
+    }
+
     void Start()
     {
         anim = GetComponentInChildren<Animator>();
@@ -61,7 +93,8 @@ public class Valken : NetworkBehaviour
     {
         GameObject temp = null;
         RaycastHit hit;
-        Physics.Raycast(transform.position + transform.forward * 0.4f + transform.up * 0.1f, Vector3.down, out hit, 0.1f);
+        Physics.Raycast(transform.position + transform.forward * 0.4f + transform.up * 0.1f, Vector3.down, out hit,
+            0.1f);
         if (hit.collider != null) temp = hit.collider.gameObject;
         return temp;
     }
@@ -89,6 +122,7 @@ public class Valken : NetworkBehaviour
                 {
                     transform.Translate(Vector3.forward * speed * Time.deltaTime);
                 }
+
                 isMoving = true;
             }
         }
@@ -107,6 +141,7 @@ public class Valken : NetworkBehaviour
                 {
                     transform.Translate(Vector3.forward * speed * Time.deltaTime);
                 }
+
                 isMoving = true;
             }
         }
@@ -153,6 +188,7 @@ public class Valken : NetworkBehaviour
                 Boost.Play();
                 Boost.loop = true;
             }
+
             isMoving = true;
         }
         else
@@ -168,6 +204,7 @@ public class Valken : NetworkBehaviour
                 GetComponent<AudioSource>().Play();
                 StartCoroutine("LightControl");
             }
+
             RightMuzzle.emissionRate = LeftMuzzle.emissionRate = 10;
             RightFire.emissionRate = LeftFire.emissionRate = 30;
         }
@@ -183,22 +220,33 @@ public class Valken : NetworkBehaviour
         {
             LaunchMissile();
         }
+
         GetComponent<Rigidbody>().velocity = new Vector3(0f, GetComponent<Rigidbody>().velocity.y, 0f);
     }
+
+    private void Update()
+    {
+        floatingInfo.transform.LookAt(Camera.main.transform);
+    }
+
 
     void LaunchMissile()
     {
         if (!LeanTween.isTweening(gameObject))
         {
             Vector3 pos = Vector3.zero;
-            if (dir == Direction.RIGHT) pos = new Vector3(transform.position.x + 1.0f, transform.position.y + 1.0f, transform.position.z);
-            if (dir == Direction.LEFT) pos = new Vector3(transform.position.x - 1.0f, transform.position.y + 1.0f, transform.position.z);
+            if (dir == Direction.RIGHT)
+                pos = new Vector3(transform.position.x + 1.0f, transform.position.y + 1.0f, transform.position.z);
+            if (dir == Direction.LEFT)
+                pos = new Vector3(transform.position.x - 1.0f, transform.position.y + 1.0f, transform.position.z);
 
             for (int i = 0; i < 5; i++)
             {
                 Vector3 origin = pos + Vector3.up * Random.Range(-1f, 1f) + Vector3.left * Random.Range(-1f, 1f);
-                GameObject temp = Instantiate(Bomb, origin, Quaternion.AngleAxis(dir == Direction.RIGHT ? 0f : 180f, Vector3.up)) as GameObject;
-                Vector3 tarPos = MissilePoint.position + MissilePoint.forward * 20f + MissilePoint.up * Random.Range(-1f, 1f);
+                GameObject temp = Instantiate(Bomb, origin,
+                    Quaternion.AngleAxis(dir == Direction.RIGHT ? 0f : 180f, Vector3.up)) as GameObject;
+                Vector3 tarPos = MissilePoint.position + MissilePoint.forward * 20f +
+                                 MissilePoint.up * Random.Range(-1f, 1f);
                 temp.SendMessage("LaunchMissile", tarPos);
             }
         }
