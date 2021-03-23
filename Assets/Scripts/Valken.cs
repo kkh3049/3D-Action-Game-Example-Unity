@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Mirror;
 
 enum Direction
 {
@@ -7,7 +8,7 @@ enum Direction
     RIGHT,
 }
 
-public class Valken : MonoBehaviour
+public class Valken : NetworkBehaviour
 {
     Animator anim;
     Direction dir = Direction.RIGHT;
@@ -28,6 +29,11 @@ public class Valken : MonoBehaviour
     public bool isMoving = false;
     float JumpTimer = 0f;
 
+    public override void OnStartLocalPlayer()
+    {
+        Camera.main.GetComponent<FollowCam>().TargetPlayer = transform;
+    }
+    
     void Start()
     {
         anim = GetComponentInChildren<Animator>();
@@ -62,7 +68,13 @@ public class Valken : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (Input.GetKey(KeyCode.LeftArrow) || (MyStick.isClick && MyStick.Degree > 180f))
+        if (!isLocalPlayer)
+        {
+            return;
+        }
+
+        var horizontal = Input.GetAxis("Horizontal");
+        if (horizontal < 0)
         {
             if (!LeanTween.isTweening(gameObject))
             {
@@ -80,7 +92,7 @@ public class Valken : MonoBehaviour
                 isMoving = true;
             }
         }
-        else if (Input.GetKey(KeyCode.RightArrow) || (MyStick.isClick && MyStick.Degree <= 180f))
+        else if (horizontal > 0)
         {
             if (!LeanTween.isTweening(gameObject))
             {
@@ -104,12 +116,14 @@ public class Valken : MonoBehaviour
             isMoving = false;
         }
 
-        if (Input.GetKey(KeyCode.UpArrow))
+        var vertical = Input.GetAxis("Vertical");
+
+        if (vertical > 0)
         {
             RightArm.Rotate(Vector3.back * 200f * Time.deltaTime);
             LeftArm.Rotate(Vector3.back * 200f * Time.deltaTime);
         }
-        else if (Input.GetKey(KeyCode.DownArrow))
+        else if (vertical < 0)
         {
             RightArm.Rotate(Vector3.forward * 200f * Time.deltaTime);
             LeftArm.Rotate(Vector3.forward * 200f * Time.deltaTime);
