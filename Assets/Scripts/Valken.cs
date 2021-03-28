@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using Mirror;
 using Random = UnityEngine.Random;
@@ -39,8 +40,25 @@ public class Valken : NetworkBehaviour
     [SyncVar(hook = nameof(OnColorChanged))]
     public Color playerColor = Color.white;
 
+    private SceneScript sceneScript;
+
+    private void Awake()
+    {
+        sceneScript = GameObject.FindObjectOfType<SceneScript>();
+    }
+
+    [Command]
+    public void CmdSendPlayerMessage()
+    {
+        if (sceneScript)
+        {
+            sceneScript.statusText = $"{playerName} says hello {Random.Range(10, 99)}";
+        }
+    }
+
     public override void OnStartLocalPlayer()
     {
+        sceneScript.playerScript = this;
         Camera.main.GetComponent<FollowCam>().TargetPlayer = transform;
 
         string name = "Player" + Random.Range(100, 999);
@@ -53,6 +71,7 @@ public class Valken : NetworkBehaviour
     {
         playerName = _name;
         playerColor = _col;
+        sceneScript.statusText = $"{playerName} joined.";
     }
 
     void OnNameChanged(string _Old, string _New)
