@@ -44,7 +44,7 @@ public class Valken : NetworkBehaviour
 
     private void Awake()
     {
-        sceneScript = GameObject.FindObjectOfType<SceneScript>();
+        sceneScript = GameObject.Find("SceneReference").GetComponent<SceneReference>().sceneScript;
     }
 
     [Command]
